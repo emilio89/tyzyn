@@ -1,0 +1,40 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "es.tyzyn",
+      "nativeLanguage": "es"
+    },
+    "jhipsterVersion": "6.8.0",
+    "applicationType": "monolith",
+    "baseName": "tyzyn",
+    "packageName": "es.tyzyn",
+    "packageFolder": "es/tyzyn",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "ehcache",
+    "enableHibernateCache": false,
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "mysql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "maven",
+    "enableSwaggerCodegen": true,
+    "jwtSecretKey": "YjUyMjM4OWUxZjdkZjQ1YzIyZDM2NjI0ZDVkNjQ0OGRmMGRkODg3MjNhMTg4YTIzNGIxMDdjZTdhZDFlYzBiZDcxZjIyOGIwOTExMTE5ZjJiZmQ4MmZjMGZhOTE1YTZhNTE2NzRhMTBlMzQzYjBmMWQ0MzFlMjY1NDZkNTgxNWM=",
+    "embeddableLaunchScript": false,
+    "creationTimestamp": 1588180350104,
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "entitySuffix": "",
+    "dtoSuffix": "DTO",
+    "otherModules": [],
+    "enableTranslation": true,
+    "clientPackageManager": "npm",
+    "nativeLanguage": "es",
+    "languages": ["es", "en"],
+    "blueprints": [],
+    "skipClient": true
+  }
+}
