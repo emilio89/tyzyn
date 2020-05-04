@@ -31,7 +31,6 @@ public class CacheConfiguration {
     @Bean
     public JCacheManagerCustomizer cacheManagerCustomizer() {
         return cm -> {
-            createCache(cm, es.tyzyn.repository.UserRepository.USERS_BY_LOGIN_CACHE);
             createCache(cm, es.tyzyn.repository.UserRepository.USERS_BY_EMAIL_CACHE);
             // jhipster-needle-ehcache-add-entry
         };
