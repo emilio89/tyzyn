@@ -134,7 +134,7 @@ info:
 
 jhipster:
   clientApp:
-    name: 'tyzynApp'
+    name: 'Tyzyn APP'
   # By default CORS is disabled. Uncomment to enable.
   # cors:
   #     allowed-origins: "*"
@@ -144,7 +144,7 @@ jhipster:
   #     allow-credentials: true
   #     max-age: 1800
   mail:
-    from: tyzyn@localhost
+    from: tyzynapp@gmail.com
   swagger:
     default-include-pattern: /api/.*
     title: tyzyn API
