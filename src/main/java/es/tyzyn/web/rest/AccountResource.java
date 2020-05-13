@@ -1,25 +1,44 @@
 package es.tyzyn.web.rest;
 
-import es.tyzyn.domain.User;
-import es.tyzyn.repository.UserRepository;
-import es.tyzyn.security.SecurityUtils;
-import es.tyzyn.service.MailService;
-import es.tyzyn.service.UserService;
-import es.tyzyn.service.dto.PasswordChangeDTO;
-import es.tyzyn.service.dto.UserDTO;
-import es.tyzyn.web.rest.errors.*;
-import es.tyzyn.web.rest.vm.KeyAndPasswordVM;
-import es.tyzyn.web.rest.vm.ManagedUserVM;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.util.*;
+import es.tyzyn.domain.User;
+import es.tyzyn.repository.UserRepository;
+import es.tyzyn.security.SecurityUtils;
+import es.tyzyn.security.jwt.JWTFilter;
+import es.tyzyn.security.jwt.TokenProvider;
+import es.tyzyn.service.MailService;
+import es.tyzyn.service.UserService;
+import es.tyzyn.service.dto.PasswordChangeDTO;
+import es.tyzyn.service.dto.UserDTO;
+import es.tyzyn.service.mapper.UserMapper;
+import es.tyzyn.web.rest.UserJWTController.JWTToken;
+import es.tyzyn.web.rest.errors.EmailAlreadyUsedException;
+import es.tyzyn.web.rest.errors.InvalidPasswordException;
+import es.tyzyn.web.rest.errors.LoginAlreadyUsedException;
+import es.tyzyn.web.rest.vm.KeyAndPasswordVM;
+import es.tyzyn.web.rest.vm.ManagedUserVM;
 
 /**
  * REST controller for managing the current user's account.
@@ -40,13 +59,19 @@ public class AccountResource {
 
     private final UserService userService;
 
-    private final MailService mailService;
+	private final MailService mailService;
+	private final TokenProvider tokenProvider;
 
-    public AccountResource(UserRepository userRepository, UserService userService, MailService mailService) {
+	private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-        this.userRepository = userRepository;
-        this.userService = userService;
+	public AccountResource(UserRepository userRepository, UserService userService, MailService mailService,
+			TokenProvider tokenProvider, AuthenticationManagerBuilder authenticationManagerBuilder) {
+
+		this.userRepository = userRepository;
+		this.userService = userService;
         this.mailService = mailService;
+        this.tokenProvider = tokenProvider;
+        this.authenticationManagerBuilder = authenticationManagerBuilder;
     }
 
     /**
@@ -56,16 +81,30 @@ public class AccountResource {
      * @throws InvalidPasswordException {@code 400 (Bad Request)} if the password is incorrect.
      * @throws EmailAlreadyUsedException {@code 400 (Bad Request)} if the email is already used.
      * @throws LoginAlreadyUsedException {@code 400 (Bad Request)} if the login is already used.
+     * @return de token of the user.
+
      */
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
+    public ResponseEntity<JWTToken> registerAccount(@Valid @RequestBody ManagedUserVM managedUserVM) {
         if (!checkPasswordLength(managedUserVM.getPassword())) {
             throw new InvalidPasswordException();
         }
         User user = userService.registerUser(managedUserVM, managedUserVM.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(user.getLogin(), managedUserVM.getPassword());
+
+            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.createToken(authentication, true);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add(JWTFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+            return new ResponseEntity<>(new JWTToken(jwt), httpHeaders, HttpStatus.CREATED);
+
        // mailService.sendActivationEmail(user);
     }
+    
+
 
     /**
      * {@code GET  /activate} : activate the registered user.

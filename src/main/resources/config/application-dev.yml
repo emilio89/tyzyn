@@ -61,7 +61,7 @@ spring:
       host: smtp.gmail.com
       port: 587
       username: tyzynapp@gmail.com  #Replace this field with your Gmail username.
-      password: @Tyzyn.APP_2020           #Replace this field with your Gmail password/App password.
+      password: ASDFA           #Replace this field with your Gmail password/App password.
       protocol: smtp
       tls: true
       properties.mail.smtp:
